@@ -69,6 +69,8 @@ spec:
               value: /var/lib/kafka/data/logs
             - name: KAFKA_HEAP_OPTS
               value: -Xms256m -Xmx512m
+            - name: JAVA_TOOL_OPTIONS
+              value: -XX:UseAVX=0 -XX:UseSSE=2
             - name: CLUSTER_ID
               value: MkU3OEVBNTcwNTJENDM2Qk
           resources:
