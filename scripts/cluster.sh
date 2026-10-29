@@ -13,7 +13,7 @@ case "${1:-deploy}" in
     kind load docker-image viro:local --name viro
     kubectl --context "$context" apply -f k8s/infra.yaml
     kubectl --context "$context" -n viro rollout status statefulset/kafka --timeout=180s
-    kubectl --context "$context" -n viro create configmap viro-source --from-file=observations.json=data/observations.json --dry-run=client -o yaml | kubectl --context "$context" apply -f -
+    kubectl --context "$context" -n viro create configmap viro-source --from-file=observations.json=data/observations.json --dry-run=client -o yaml | kubectl --context "$context" apply --server-side -f -
     kubectl --context "$context" apply -f k8s/apps.yaml
     kubectl --context "$context" -n viro rollout status statefulset/viro-worker --timeout=180s
     kubectl --context "$context" -n viro rollout status deployment/viro-gateway --timeout=180s

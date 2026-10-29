@@ -6,7 +6,7 @@ A publisher sends a frozen CDC extract to a Kafka topic with three partitions. T
 
 ## Status
 
-The application code and design are present. The local Kubernetes context currently has no resources in the `viro` namespace. Deployment and end-to-end validation remain pending. See [verification results](docs/results.md) for checks actually completed. Proposed targets are not benchmark results.
+The Java build and container image succeeded, and the public repository uses `master` as its default branch. The local kind deployment is in progress; its two-CPU Docker engine has repeatedly timed out Kubernetes control-plane requests while pulling and unpacking images. Kafka and consumer readiness plus end-to-end query validation are still pending. See [verification results](docs/results.md) for the observed status. Proposed targets are not benchmark results.
 
 ## Run locally
 

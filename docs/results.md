@@ -1,1 +1,26 @@
-# Verification results\n\nStatus: deployment and validation are pending.\n\n## Checks completed\n\n- On October 29, 2026, `kubectl --context kind-viro -n viro get pods,services,persistentvolumeclaims,jobs` returned `No resources found in viro namespace.`\n- The local kind control-plane container exists, but the Viro namespace has no deployed workloads.\n- Existing build output does not establish that the current source was built or that the deployment works.\n\n## Checks and measurements still needed\n\nRecord the command, environment, input checksum, and observed result for each check:\n\n- [ ] Build and focused unit tests from the current source.\n- [ ] Build the container image.\n- [ ] Deploy Kafka, all three workers, the gateway, and Prometheus to kind.\n- [ ] Verify exactly three Kafka partitions and exact source-to-database reconciliation.\n- [ ] Compare database query results with Parquet query results.\n- [ ] Restart a worker and verify its data and offset recover.\n- [ ] Query while a required worker is unavailable and record the gateway behavior.\n- [ ] Run the one-, two-, and three-worker experiments after the changes in [the scaling plan](scaling-experiment.md).\n- [ ] Measure the first sustained backlog or latency limit.\n- [ ] Compare bounded transaction batch sizes from the same initial state.\n- [ ] Record the first failure under load, recovery time, and any improvement.\n\nDo not report proposed targets as measured results. Do not claim a throughput improvement, saturation point, or successful deployment until the corresponding evidence is recorded here.\n
+# Verification results
+
+Status: build and image creation succeeded. The local kind deployment is incomplete because the two-CPU Docker engine repeatedly timed out its Kubernetes control plane while unpacking the Kafka and Prometheus images. Do not treat the deployment as validated yet.
+
+## Checks completed on October 29, 2026
+
+- `mvn -s /tmp/viro-maven-settings.xml -q test package` passed using Maven Central directly; the user's Oracle Maven mirrors were bypassed.
+- `docker build -t viro:local .` succeeded. The image is `linux/amd64` and was imported into kind.
+- The CDC extract has 1,200 rows (400 per pathogen) and is present in the local `data/` directory. The extract is intentionally excluded from Git; `scripts/fetch-data.py` recreates it.
+- `Annorak/viro` is public, and GitHub reports `master` as the default branch.
+- The Kafka and Viro worker StatefulSets, gateway, producer Job, and Prometheus deployment were accepted by Kubernetes.
+- Prometheus reached Running. The gateway and producer containers started. Kafka's PVC bound, but Kafka and the three worker pods have not reached Ready. The producer Job has not completed. No end-to-end query or metric scrape has been verified.
+- Kubernetes repeatedly logged API-server TLS timeouts and scheduler restarts while images were being unpacked. The Docker engine currently exposes two CPUs to kind.
+
+## Remaining validation
+
+- [ ] Confirm Kafka and all three worker pods are Ready.
+- [ ] Confirm the producer Job completes and Kafka has exactly three topic partitions.
+- [ ] Reconcile source row count against the sum of the three local databases.
+- [ ] Verify a filtered database query and compare it with the Parquet snapshot query.
+- [ ] Scrape a worker metric from Prometheus.
+- [ ] Restart a worker and verify its data and stored offset recover.
+- [ ] Measure the load limit and record the first failure and recovery behavior.
+- [ ] Run the one-, two-, and three-worker experiments in [the scaling plan](scaling-experiment.md).
+
+Do not report an end-to-end success, measured saturation point, or throughput improvement until the corresponding evidence is recorded here.
