@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: viro-load
+  namespace: viro
+spec:
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app: viro-producer
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: producer
+          image: viro:local
+          imagePullPolicy: Never
+          env:
+            - name: VIRO_ROLE
+              value: producer
+            - name: KAFKA_BOOTSTRAP
+              value: kafka:9092
+            - name: KAFKA_TOPIC
+              value: viro-observations
+            - name: SOURCE_FILE
+              value: /source/observations.json
+            - name: JAVA_TOOL_OPTIONS
+              value: -Xmx256m
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: source
+              mountPath: /source
+              readOnly: true
+      volumes:
+        - name: source
+          configMap:
+            name: viro-source
